@@ -9,6 +9,7 @@ physarum::physarum()
 
     while(!pquit)
     {
+        sim_tick();
         draw_everything();
     }
 }

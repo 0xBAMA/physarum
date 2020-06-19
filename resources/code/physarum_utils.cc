@@ -18,8 +18,8 @@ void physarum::create_window()
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
-	// SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1);  //gl_SamplePosition has to be used in my shader in order for this to
-	// SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 8);   //have any effect on the way my shader works (i.e. add to gl_FragCoord)
+	// SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1);
+	// SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 8);
 
 	// this is how you query the screen resolution
 	SDL_DisplayMode dm;
@@ -133,7 +133,39 @@ void physarum::create_window()
 	colors[ImGuiCol_NavWindowingHighlight]  = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
 	colors[ImGuiCol_NavWindowingDimBg]      = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
 	colors[ImGuiCol_ModalWindowDimBg]       = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+
+	// some info on your current platform
+	const GLubyte *renderer = glGetString( GL_RENDERER ); // get renderer string
+	const GLubyte *version = glGetString( GL_VERSION );		// version as a string
+	printf( "Renderer: %s\n", renderer );
+	printf( "OpenGL version supported %s\n", version );
 	
+	
+	
+	
+	
+	// create the shader for the points to draw the physarum agents, which also does the movement logic
+    agent_shader = Shader("resources/code/shaders/agent.vs.glsl", "resources/code/shaders/agent.fs.glsl").Program;
+
+	// create the shader for the triangles to draw the pheremone field
+    continuum_shader = Shader("resources/code/shaders/continuum.vs.glsl", "resources/code/shaders/continuum.fs.glsl").Program;
+	
+	// create the compute shader for the diffusion and decay of the pheremone field
+    diffuse_and_decay_shader = CShader("resources/code/shaders/diffuse_and_decay.cs.glsl").Program;
+	
+	
+	
+	// create the image2d object for the pheremone field
+        // 16-bit, one channel image texture with GL_R16UI or maybe 32 bit with GL_R32UI 
+	
+	// create the SSBO for the agent positions, directions
+		
+}
+
+
+void physarum::sim_tick()
+{
+    // do the simulation update 
 }
 
 
@@ -166,8 +198,8 @@ void physarum::draw_everything()
 	ImGui::NewFrame();
 
 	// show the demo window
-	static bool show_demo_window = true;
-	if (show_demo_window) ImGui::ShowDemoWindow(&show_demo_window);
+	// static bool show_demo_window = true;
+	// if (show_demo_window) ImGui::ShowDemoWindow(&show_demo_window);
 
 
 	// do my own window
@@ -176,9 +208,11 @@ void physarum::draw_everything()
 	ImGui::Begin("Controls", NULL, 0);
 
 	// widgets
-	ImGui::Text(" ");
+	ImGui::Text("Sensor Angle: ");
 	
-	HelpMarker("USER:\nHold SHIFT or use mouse to select text.\n" "CTRL+Left/Right to word jump.\n" "CTRL+A or double-click to select all.\n" "CTRL+X,CTRL+C,CTRL+V clipboard.\n" "CTRL+Z,CTRL+Y undo/redo.\n" "ESCAPE to revert.");
+	
+	ImGui::Text("Sensor Distance: ");
+	// HelpMarker("USER:\nHold SHIFT or use mouse to select text.\n" "CTRL+Left/Right to word jump.\n" "CTRL+A or double-click to select all.\n" "CTRL+X,CTRL+C,CTRL+V clipboard.\n" "CTRL+Z,CTRL+Y undo/redo.\n" "ESCAPE to revert.");
 
 
 	
