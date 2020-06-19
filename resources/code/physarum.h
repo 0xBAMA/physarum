@@ -25,6 +25,9 @@ private:
 	GLuint agent_shader;
 	GLuint continuum_shader;
 	GLuint diffuse_and_decay_shader;
+	
+	GLuint continuum_vao;
+	GLuint continuum_vbo;
 
 			
 	void create_window();

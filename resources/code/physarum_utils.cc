@@ -18,8 +18,8 @@ void physarum::create_window()
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 
-	// SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1);
-	// SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 8);
+	SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1);
+	SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 8);
 
 	// this is how you query the screen resolution
 	SDL_DisplayMode dm;
@@ -49,8 +49,17 @@ void physarum::create_window()
 	GLcontext = SDL_GL_CreateContext( window );
 
 	SDL_GL_MakeCurrent(window, GLcontext);
-	SDL_GL_SetSwapInterval(1); // Enable vsync -- questionable utility
+	SDL_GL_SetSwapInterval(1); // Enable vsync
 	// SDL_GL_SetSwapInterval(0); // explicitly disable vsync
+
+    // CONTINUUM REPRESENTATION POINTS
+
+
+
+
+
+
+
 
 
 	if (glewInit() != GLEW_OK)
@@ -59,7 +68,9 @@ void physarum::create_window()
 	}
 
 	glEnable(GL_DEPTH_TEST);
+    glEnable(GL_POINT_SMOOTH);
 
+    glPointSize(3.0);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
@@ -138,7 +149,7 @@ void physarum::create_window()
 	const GLubyte *renderer = glGetString( GL_RENDERER ); // get renderer string
 	const GLubyte *version = glGetString( GL_VERSION );		// version as a string
 	printf( "Renderer: %s\n", renderer );
-	printf( "OpenGL version supported %s\n", version );
+	printf( "OpenGL version supported %s\n\n\n", version );
 	
 	
 	
@@ -147,18 +158,83 @@ void physarum::create_window()
 	// create the shader for the points to draw the physarum agents, which also does the movement logic
     agent_shader = Shader("resources/code/shaders/agent.vs.glsl", "resources/code/shaders/agent.fs.glsl").Program;
 
-	// create the shader for the triangles to draw the pheremone field
-    continuum_shader = Shader("resources/code/shaders/continuum.vs.glsl", "resources/code/shaders/continuum.fs.glsl").Program;
 	
+
+
+
+
+    // create the shader for the triangles to draw the pheremone field
+    continuum_shader = Shader("resources/code/shaders/continuum.vs.glsl", "resources/code/shaders/continuum.fs.glsl").Program;
+
+    // set up the points for the continuum
+    //  A---------------B
+    //  |          .    |
+    //  |       .       |
+    //  |    .          |
+    //  |               |
+    //  C---------------D
+
+    // diagonal runs from C to B
+    //  A is -1, 1
+    //  B is  1, 1
+    //  C is -1,-1
+    //  D is  1,-1
+    std::vector<glm::vec3> points;
+    
+    points.clear();
+    points.push_back(glm::vec3(-1, 1, 0.5));  //A
+    points.push_back(glm::vec3(-1,-1, 0.5));  //C
+    points.push_back(glm::vec3( 1, 1, 0.5));  //B
+
+    points.push_back(glm::vec3( 1, 1, 0.5));  //B
+    points.push_back(glm::vec3(-1,-1, 0.5));  //C
+    points.push_back(glm::vec3( 1,-1, 0.5));  //D
+
+    // vao, vbo
+    cout << "  setting up vao, vbo for continuum model...";
+    glGenVertexArrays( 1, &continuum_vao );
+    glBindVertexArray( continuum_vao );
+
+    glGenBuffers( 1, &continuum_vbo );
+    glBindBuffer( GL_ARRAY_BUFFER, continuum_vbo );
+    cout << "done." << endl;
+
+    // buffer the data
+    cout << "  buffering vertex data...";
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * points.size(), NULL, GL_DYNAMIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3) * points.size(), &points[0]);
+    cout << "done." << endl;
+
+    // set up attributes
+    cout << "  setting up attributes in continuum shader...";
+    GLuint points_attrib = glGetAttribLocation(continuum_shader, "vPosition");
+    glEnableVertexAttribArray(points_attrib);
+    glVertexAttribPointer(points_attrib, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*) (static_cast<const char*>(0) + (0)));
+    cout << "done." << endl; 
+
+
+
+
+
+
 	// create the compute shader for the diffusion and decay of the pheremone field
     diffuse_and_decay_shader = CShader("resources/code/shaders/diffuse_and_decay.cs.glsl").Program;
 	
+
+
+
+
+
 	
 	
 	// create the image2d object for the pheremone field
         // 16-bit, one channel image texture with GL_R16UI or maybe 32 bit with GL_R32UI 
 	
-	// create the SSBO for the agent positions, directions
+	
+
+
+
+    // create the SSBO for the agent positions, directions
 		
 }
 
@@ -190,7 +266,18 @@ void physarum::draw_everything()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);                     // clear the background
 
 	// draw the stuff on the GPU
-	// GPU_Data.display();
+
+    // continuum
+    glUseProgram(continuum_shader);
+    glBindVertexArray( continuum_vao );
+    glBindBuffer( GL_ARRAY_BUFFER, continuum_vbo );
+
+    glDrawArrays( GL_TRIANGLES, 0, 6 );
+
+
+
+
+
 
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
