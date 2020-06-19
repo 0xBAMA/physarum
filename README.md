@@ -1,2 +1,1 @@
-# physarum
-experimenting with physarum sims
+# minimal_imgui_demo
