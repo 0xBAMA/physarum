@@ -9,7 +9,7 @@ msg:
 		@date
 		@echo
 
-main: imgui lodepng.o perlin.o physarum.o
+main: imgui lodepng.o perlin.o physarum.o utils.o
 		g++ -o main resources/code/main.cc *.o                           ${VORALDO_FLAGS}
 
 imgui: resources/imgui/*
@@ -22,8 +22,11 @@ imgui: resources/imgui/*
 		@echo
 
 
+utils.o: resources/code/physarum.h resources/code/physarum_utils.cc
+		g++ -c -o utils.o resources/code/physarum_utils.cc               ${VORALDO_FLAGS}
+
 physarum.o: resources/code/physarum.h resources/code/physarum.cc
-		g++ -c -o utils.o resources/code/physarum.cc             ${VORALDO_FLAGS}
+		g++ -c -o physarum.o resources/code/physarum.cc                  ${VORALDO_FLAGS}
 
 debug.o: resources/code/debug.cc
 		g++ -c -o debug.o resources/code/debug.cc                        ${VORALDO_FLAGS}
