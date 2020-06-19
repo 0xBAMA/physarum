@@ -158,7 +158,7 @@ void physarum::create_window()
 	// create the shader for the points to draw the physarum agents, which also does the movement logic
     agent_shader = Shader("resources/code/shaders/agent.vs.glsl", "resources/code/shaders/agent.fs.glsl").Program;
 
-	
+    	
 
 
 
@@ -274,8 +274,11 @@ void physarum::draw_everything()
 
     glDrawArrays( GL_TRIANGLES, 0, 6 );
 
+    // agents
+    glUseProgram(agent_shader);
+    glPointSize(5.0);
 
-
+    glDrawArrays( GL_POINTS, 0, 1 );
 
 
 

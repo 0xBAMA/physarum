@@ -15,5 +15,6 @@ void main()
 	vec2 position = data[index];
 	vec2 direction = data[index+1];
 
-	gl_Position = vec4(position.x, position.y, 0, 1);
+	// gl_Position = vec4(position.x, position.y, 0, 1);
+	gl_Position = vec4(0,0,0,1);
 }
