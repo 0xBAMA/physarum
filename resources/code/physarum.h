@@ -20,7 +20,7 @@ private:
 	
 	float sense_angle;
 	float sense_distance;
-	
+	// other sim params ... 
 	
 	GLuint agent_shader;
 	GLuint continuum_shader;
@@ -28,7 +28,8 @@ private:
 	
 	GLuint continuum_vao;
 	GLuint continuum_vbo;
-
+	
+	GLuint agent_ssbo;
 			
 	void create_window();
 	void sim_tick();

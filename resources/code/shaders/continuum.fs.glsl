@@ -1,9 +1,13 @@
 #version 430 core
 
-in vec4 v_color;
+in vec2 v_pos;
+
 out vec4 fragment_output;
+
+uniform layout( r16ui ) uimage2D previous;
+uniform layout( r16ui ) uimage2D current;
 
 void main()
 {
-	fragment_output = v_color;
+	fragment_output = vec4(v_pos.xy,0,1.0);
 }

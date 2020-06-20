@@ -229,19 +229,50 @@ void physarum::create_window()
 	
 	// create the image2d object for the pheremone field
         // 16-bit, one channel image texture with GL_R16UI or maybe 32 bit with GL_R32UI 
-	
+	    // seed with all zero values or some data generated with std::random
 	
 
 
 
     // create the SSBO for the agent positions, directions
-		
+        // only needs to be set up for the agent shader
+    std::vector<GLfloat> agent_data;
+
+    long unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
+
+    std::default_random_engine engine{seed};
+    std::uniform_real_distribution<GLfloat> distribution{-1, 1};
+
+    for (int i = 0; i < NUM_AGENTS; ++i)
+    {
+        glm::vec2 pos, dir;
+
+        pos.x = distribution(engine);
+        pos.y = distribution(engine);
+
+        dir.x = distribution(engine);
+        dir.y = distribution(engine);
+
+        dir = glm::normalize(dir);  //we want unit length
+
+        agent_data.push_back(static_cast<GLfloat>(pos.x));
+        agent_data.push_back(static_cast<GLfloat>(pos.y));
+
+        agent_data.push_back(static_cast<GLfloat>(dir.x));
+        agent_data.push_back(static_cast<GLfloat>(dir.y));
+    }
+
+    glGenBuffers(1, &agent_ssbo);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, agent_ssbo);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(GLfloat)*2*NUM_AGENTS, (GLvoid*)&agent_data[0],  GL_DYNAMIC_COPY);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, agent_ssbo); 
+
 }
 
 
 void physarum::sim_tick()
 {
-    // do the simulation update 
+    // run the diffuse_and_decay_shader
 }
 
 
@@ -265,6 +296,12 @@ void physarum::draw_everything()
 	glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);   // from hsv picker
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);                     // clear the background
 
+
+
+
+
+
+
 	// draw the stuff on the GPU
 
     // continuum
@@ -274,11 +311,16 @@ void physarum::draw_everything()
 
     glDrawArrays( GL_TRIANGLES, 0, 6 );
 
+
     // agents
     glUseProgram(agent_shader);
-    glPointSize(5.0);
+    glPointSize(3.0);
 
-    glDrawArrays( GL_POINTS, 0, 1 );
+    glDrawArrays( GL_POINTS, 0, NUM_AGENTS );
+
+
+
+
 
 
 
@@ -298,11 +340,13 @@ void physarum::draw_everything()
 	ImGui::Begin("Controls", NULL, 0);
 
 	// widgets
-	ImGui::Text("Sensor Angle: ");
-	
+	ImGui::Text("Sensor Angle:    ");
+    ImGui::SameLine();
+    HelpMarker("The angle between the sensors.");
 	
 	ImGui::Text("Sensor Distance: ");
-	// HelpMarker("USER:\nHold SHIFT or use mouse to select text.\n" "CTRL+Left/Right to word jump.\n" "CTRL+A or double-click to select all.\n" "CTRL+X,CTRL+C,CTRL+V clipboard.\n" "CTRL+Z,CTRL+Y undo/redo.\n" "ESCAPE to revert.");
+    ImGui::SameLine();
+    HelpMarker("The distance from the agent position to the sensors.");
 
 
 	
