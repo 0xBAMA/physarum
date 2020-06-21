@@ -25,7 +25,7 @@ private:
 	bool show_agents;
 	bool show_trails;
 	GLuint deposit_amount;
-	float decay_factor
+	float decay_factor;
 	// int neighborhood_size; // just going to use 3x3 gaussian kernel
 	float agent_pointsize; 
 

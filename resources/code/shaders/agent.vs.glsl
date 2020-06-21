@@ -50,7 +50,7 @@ void main()
 	data[index] = new_position;
 	
 	
-	imageAtomicAdd(current, ivec2(imageSize(current)*(0.5*(new_position+vec2(1)))), 100);
+	imageAtomicAdd(current, ivec2(imageSize(current)*(0.5*(new_position+vec2(1)))), 3000);
 	v_pos = new_position;
 	
 	gl_Position = vec4(new_position.x, new_position.y, 0, 1);

@@ -263,9 +263,12 @@ void physarum::gl_setup()
     {
         glm::vec2 pos, dir;
 
-        pos.x = ndistribution(engine);
-        pos.y = ndistribution(engine);
+        // pos.x = ndistribution(engine);
+        // pos.y = ndistribution(engine);
 
+        pos.x = udistribution(engine);
+        pos.y = udistribution(engine);
+        
         dir.x = udistribution(engine);
         dir.y = udistribution(engine);
 
@@ -289,6 +292,15 @@ void physarum::gl_setup()
 void physarum::sim_tick()
 {
     // run the diffuse_and_decay_shader
+    glUseProgram(diffuse_and_decay_shader);
+
+    //swap the images
+    std::swap(continuum_textures[0], continuum_textures[1]);
+    glBindImageTexture(1, continuum_textures[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
+    glBindImageTexture(2, continuum_textures[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
+
+    glDispatchCompute(DIM/8, DIM/8, 1);
+    glMemoryBarrier( GL_SHADER_IMAGE_ACCESS_BARRIER_BIT );
 }
 
 
