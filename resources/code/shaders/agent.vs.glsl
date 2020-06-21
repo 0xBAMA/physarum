@@ -34,6 +34,7 @@ void main()
 	
 	vec2 new_position = (position + amt * direction);
 	
+	// wrap logic
 	if(new_position.x > 1.0)
 		new_position.x = -1.0;
 		
@@ -48,7 +49,8 @@ void main()
 	
 	data[index] = new_position;
 	
-
+	
+	imageAtomicAdd(current, ivec2(imageSize(current)*(0.5*(new_position+vec2(1)))), 100);
 	v_pos = new_position;
 	
 	gl_Position = vec4(new_position.x, new_position.y, 0, 1);

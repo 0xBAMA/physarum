@@ -253,19 +253,21 @@ void physarum::gl_setup()
     long unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
 
     std::default_random_engine engine{seed};
-    std::uniform_real_distribution<GLfloat> distribution{-1, 1};
+    std::uniform_real_distribution<GLfloat> udistribution{-1, 1};
+    std::normal_distribution<GLfloat> ndistribution(0.0,0.3); 
     
-    distribution.reset();
-    
+    udistribution.reset();
+    ndistribution.reset();
+
     for (int i = 0; i <= NUM_AGENTS; i++)
     {
         glm::vec2 pos, dir;
 
-        pos.x = distribution(engine);
-        pos.y = distribution(engine);
+        pos.x = ndistribution(engine);
+        pos.y = ndistribution(engine);
 
-        dir.x = distribution(engine);
-        dir.y = distribution(engine);
+        dir.x = udistribution(engine);
+        dir.y = udistribution(engine);
 
         dir = glm::normalize(dir);  //we want unit length
 
