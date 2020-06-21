@@ -30,6 +30,8 @@ private:
 	GLuint continuum_vbo;
 	
 	GLuint agent_ssbo;
+	
+	GLuint continuum_textures[2];
 			
 	void create_window();
 	void sim_tick();

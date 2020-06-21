@@ -10,6 +10,15 @@ layout( binding = 0, std430 ) buffer agent_data
 
 float amt = 0.01;
 
+//takes argument in radians
+vec2 rotate(vec2 v, float a) 
+{
+	float s = sin(a);
+	float c = cos(a);
+	mat2 m = mat2(c, -s, s, c);
+	return m * v;
+}
+
 void main()
 {
 	int index = gl_VertexID * 2;
@@ -18,6 +27,10 @@ void main()
 	vec2 direction = data[index+1];
 	
 	// do the simulation logic to update the value of position
+	
+		// take your samples
+		// make a decision on whether to turn left, right, go straight, or a random direction
+	
 	vec2 new_position = (position + amt * direction);
 	
 	if(new_position.x > 1.0)
@@ -36,7 +49,10 @@ void main()
 	
 	
 	
+	
+	
+	
 
 
-	gl_Position = vec4(position.x, position.y, 0, 1);
+	gl_Position = vec4(new_position.x, new_position.y, 0, 1);
 }

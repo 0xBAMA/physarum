@@ -230,7 +230,18 @@ void physarum::create_window()
 	// create the image2d object for the pheremone field
         // 16-bit, one channel image texture with GL_R16UI or maybe 32 bit with GL_R32UI 
 	    // seed with all zero values or some data generated with std::random
-	
+    
+    glGenTextures(2, &continuum_textures[0]);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, continuum_textures[0]); // use the specified ID
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, DIM, DIM, 0,  GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glBindImageTexture(0, continuum_textures[0], 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
+
+    glActiveTexture(GL_TEXTURE0+1); 
+    glBindTexture(GL_TEXTURE_2D, continuum_textures[1]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, DIM, DIM, 0,  GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glBindImageTexture(1, continuum_textures[1], 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8); 	
 
 
 
@@ -242,8 +253,10 @@ void physarum::create_window()
 
     std::default_random_engine engine{seed};
     std::uniform_real_distribution<GLfloat> distribution{-1, 1};
-
-    for (int i = 0; i < NUM_AGENTS; ++i)
+    
+    distribution.reset();
+    
+    for (int i = 0; i <= NUM_AGENTS; i++)
     {
         glm::vec2 pos, dir;
 
@@ -316,7 +329,7 @@ void physarum::draw_everything()
     glUseProgram(agent_shader);
     glPointSize(3.0);
 
-    glDrawArrays( GL_POINTS, 0, NUM_AGENTS );
+    glDrawArrays( GL_POINTS, 0, NUM_AGENTS/2 );
 
 
 
