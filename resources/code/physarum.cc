@@ -1,4 +1,5 @@
 #include "physarum.h"
+#include "debug.h"
 // This contains the very high level expression of what's going on
 
 physarum::physarum()
@@ -6,6 +7,8 @@ physarum::physarum()
     pquit = false;
 
     create_window();
+    gl_debug_enable();
+    gl_setup();
 
     while(!pquit)
     {

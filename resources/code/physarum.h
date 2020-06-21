@@ -34,6 +34,7 @@ private:
 	GLuint continuum_textures[2];
 			
 	void create_window();
+	void gl_setup();
 	void sim_tick();
 	void draw_everything();
 	

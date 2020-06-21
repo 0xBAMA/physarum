@@ -144,14 +144,15 @@ void physarum::create_window()
 	colors[ImGuiCol_NavWindowingHighlight]  = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
 	colors[ImGuiCol_NavWindowingDimBg]      = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
 	colors[ImGuiCol_ModalWindowDimBg]       = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+}
 
+void physarum::gl_setup()
+{
 	// some info on your current platform
 	const GLubyte *renderer = glGetString( GL_RENDERER ); // get renderer string
 	const GLubyte *version = glGetString( GL_VERSION );		// version as a string
 	printf( "Renderer: %s\n", renderer );
 	printf( "OpenGL version supported %s\n\n\n", version );
-	
-	
 	
 	
 	
@@ -233,15 +234,15 @@ void physarum::create_window()
     
     glGenTextures(2, &continuum_textures[0]);
 
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, continuum_textures[0]); // use the specified ID
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, DIM, DIM, 0,  GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glBindImageTexture(0, continuum_textures[0], 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, DIM, DIM, 0,  GL_RED_INTEGER, GL_UNSIGNED_INT, NULL); //pass non-null to initialize with some pheremone pattern
+    glBindImageTexture(1, continuum_textures[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
 
-    glActiveTexture(GL_TEXTURE0+1); 
+    glActiveTexture(GL_TEXTURE2); 
     glBindTexture(GL_TEXTURE_2D, continuum_textures[1]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, DIM, DIM, 0,  GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glBindImageTexture(1, continuum_textures[1], 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8); 	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, DIM, DIM, 0,  GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+    glBindImageTexture(2, continuum_textures[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI); 	
 
 
 
