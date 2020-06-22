@@ -367,17 +367,57 @@ void physarum::draw_everything()
 	ImGui::SetNextWindowSize(ImVec2(256,315));
 	ImGui::Begin("Controls", NULL, 0);
 
-	// widgets
-	ImGui::Text("Sensor Angle:    ");
+	
+
+
+    // widgets
+	ImGui::Text("Sensor Angle:                ");
     ImGui::SameLine();
     HelpMarker("The angle between the sensors.");
 	
-	ImGui::Text("Sensor Distance: ");
+    ImGui::Separator();
+
+	ImGui::Text("Sensor Distance:             ");
     ImGui::SameLine();
     HelpMarker("The distance from the agent position to the sensors.");
 
+    ImGui::Separator();
 
-	
+	ImGui::Text("Turn Angle:                  ");
+    ImGui::SameLine();
+    HelpMarker("Amount that each simulation agent can turn in the movement shader.");
+
+    ImGui::Separator();
+
+	ImGui::Text("Step Size:                   ");
+    ImGui::SameLine();
+    HelpMarker("Distance that each sim agent will go in their current direction each step.");
+
+    ImGui::Separator();
+
+	ImGui::Text("Deposit Amount:              ");
+    ImGui::SameLine();
+    HelpMarker("Amout of pheremone that is deposited by each simulation agent.");
+
+    ImGui::Separator();
+
+	ImGui::Text("Decay Factor:                ");
+    ImGui::SameLine();
+    HelpMarker("Scale factor applied when storing the result of the gaussian blur.");
+
+    ImGui::Separator();
+    ImGui::Separator();
+
+	ImGui::Text("Agent Pointsize:             ");
+    ImGui::SameLine();
+    HelpMarker("Size of the points used to render the simulation agents.");
+
+    static bool show_trails = false;
+    static bool show_agents = false;
+
+    ImGui::Checkbox("Show Trails", &show_trails);
+    ImGui::Checkbox("Show Agents", &show_agents);
+
 	ImGui::End();
 	ImGui::Render();
 

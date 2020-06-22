@@ -5,7 +5,8 @@ layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;    //specifies 
 layout( binding = 1, r32ui ) uniform uimage2D current;
 layout( binding = 2, r32ui ) uniform uimage2D previous;
 
-precision highp int;	// might overflow? not sure if this fixes that 
+precision highp int;	// might overflow? not sure if this fixes that
+// also 32 bits gives you some significant headroom
 
 void main()
 {

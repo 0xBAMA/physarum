@@ -11,7 +11,7 @@ layout( binding = 1, r32ui ) uniform uimage2D current;
 
 void main()
 {
-	uint s = imageLoad(current, ivec2(imageSize(current)*(0.5*(v_pos+vec2(1))))).r;
+	uint s = imageLoad(current, ivec2(imageSize(current)*(0.5*(v_pos+vec2(1))))).r>>3;
 	
 	fragment_output = vec4(0.0001*s,0.00006*s,0,1);
 }
