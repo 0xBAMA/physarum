@@ -263,11 +263,11 @@ void physarum::gl_setup()
     {
         glm::vec2 pos, dir;
 
-        // pos.x = ndistribution(engine);
-        // pos.y = ndistribution(engine);
+        pos.x = ndistribution(engine);
+        pos.y = ndistribution(engine);
 
-        pos.x = udistribution(engine);
-        pos.y = udistribution(engine);
+        // pos.x = udistribution(engine);
+        // pos.y = udistribution(engine);
         
         dir.x = udistribution(engine);
         dir.y = udistribution(engine);
@@ -357,6 +357,23 @@ void physarum::draw_everything()
     glUseProgram(agent_shader);
     glPointSize(agent_pointsize);
 
+    
+    // generation of the random values to be used in the shader
+    std::vector<glm::vec2> random_directions;
+    long unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
+
+    std::default_random_engine gen{seed};
+    std::uniform_real_distribution<GLfloat> dist{-1, 1};
+
+    for(int i = 0; i < 8; i++)
+        random_directions.push_back(glm::normalize(glm::vec2(dist(gen), dist(gen))));
+
+    glUniform2fv(glGetUniformLocation(agent_shader, "random_values"), 8, glm::value_ptr(random_directions[0]));
+
+    
+
+
+    // the rest of the simulation parameters
     glUniform1i(glGetUniformLocation(agent_shader, "show_agents"), show_agents);
     glUniform1f(glGetUniformLocation(agent_shader, "step_size"), step_size);
     glUniform1f(glGetUniformLocation(agent_shader, "sense_angle"), sense_angle);

@@ -17,6 +17,8 @@ uniform float sense_distance;
 uniform float turn_angle;
 uniform uint deposit_amount;
 
+uniform vec2 random_values[8];
+
 out vec2 v_pos;
 
 
@@ -43,18 +45,32 @@ void main()
 	// do the simulation logic to update the value of position
 	
 		// take your samples
-	ivec2 right_sample_loc;
-	ivec2 middle_sample_loc;
-	ivec2 left_sample_loc;
+	ivec2 right_sample_loc = ivec2(imageSize(current) * (0.5 * (position + sense_distance * rotate(direction, -sense_angle) + vec2(1))));
+	ivec2 middle_sample_loc = ivec2(imageSize(current) * (0.5 * (position + sense_distance * direction + vec2(1))));
+	ivec2 left_sample_loc = ivec2(imageSize(current) * (0.5 * (position + sense_distance * rotate(direction, sense_angle) + vec2(1))));
 		
-	uint right_sample = imageLoad().r;
-	uint middle_sample = imageLoad().r;
-	uint left_sample = imageLoad().r;
+	uint right_sample = imageLoad(current, right_sample_loc).r;
+	uint middle_sample = imageLoad(current, middle_sample_loc).r;
+	uint left_sample = imageLoad(current, left_sample_loc).r;
 	
 		// make a decision on whether to turn left, right, go straight, or a random direction
-	
-	
-	
+	if(middle_sample > left_sample && middle_sample > right_sample)
+	{ 
+		// just retain the direction		
+	}
+	else if(middle_sample < left_sample && middle_sample < right_sample)
+	{ // turn a random direction
+		direction = random_values[gl_VertexID % 8];
+	}
+	else if(right_sample > middle_sample && middle_sample > left_sample)
+	{ // turn right (positive)
+		direction = rotate(direction, turn_angle);
+	}
+	else if(left_sample > middle_sample && middle_sample > right_sample)
+	{ // turn left (negative)
+		direction = rotate(direction, -turn_angle);
+	}
+	// else, fall through and retain value of direction
 	
 	
 	vec2 new_position = (position + step_size * direction);
