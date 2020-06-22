@@ -1,1 +1,3 @@
-# minimal_imgui_demo
+# Physarum Sim 
+
+![](https://imgur.com/DDSvAOn.gif)
