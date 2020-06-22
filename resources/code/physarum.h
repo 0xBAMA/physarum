@@ -25,7 +25,6 @@ private:
 	GLuint deposit_amount;
 	float decay_factor;
 
-	float agent_pointsize; 
 
 
 	

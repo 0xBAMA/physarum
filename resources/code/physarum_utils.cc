@@ -286,6 +286,12 @@ void physarum::gl_setup()
     glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(GLfloat)*2*NUM_AGENTS, (GLvoid*)&agent_data[0],  GL_DYNAMIC_COPY);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, agent_ssbo); 
 
+	sense_angle = 0.168f;
+	sense_distance = 0.002f;
+	turn_angle = 0.168f;
+	step_size = 0.001f;
+	deposit_amount = 3000;
+	decay_factor = 0.99f;
 }
 
 
@@ -298,6 +304,8 @@ void physarum::sim_tick()
     std::swap(continuum_textures[0], continuum_textures[1]);
     glBindImageTexture(1, continuum_textures[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
     glBindImageTexture(2, continuum_textures[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
+
+    glUniform1f(glGetUniformLocation(diffuse_and_decay_shader, "decay_factor"), decay_factor);
 
     glDispatchCompute(DIM/8, DIM/8, 1);
     glMemoryBarrier( GL_SHADER_IMAGE_ACCESS_BARRIER_BIT );
@@ -324,7 +332,10 @@ void physarum::draw_everything()
 	glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);   // from hsv picker
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);                     // clear the background
 
-
+    static float agent_pointsize = 3.0f;
+    static bool show_trails = true;
+    static bool show_agents = false;
+    static ImU32 deposit_amt = 3000;
 
 
 
@@ -337,12 +348,21 @@ void physarum::draw_everything()
     glBindVertexArray( continuum_vao );
     glBindBuffer( GL_ARRAY_BUFFER, continuum_vbo );
 
+    glUniform1i(glGetUniformLocation(continuum_shader, "show_trails"), show_trails);
+
     glDrawArrays( GL_TRIANGLES, 0, 6 );
 
 
     // agents
     glUseProgram(agent_shader);
-    glPointSize(3.0);
+    glPointSize(agent_pointsize);
+
+    glUniform1i(glGetUniformLocation(agent_shader, "show_agents"), show_agents);
+    glUniform1f(glGetUniformLocation(agent_shader, "step_size"), step_size);
+    glUniform1f(glGetUniformLocation(agent_shader, "sense_angle"), sense_angle);
+    glUniform1f(glGetUniformLocation(agent_shader, "sense_distance"), sense_distance);
+    glUniform1f(glGetUniformLocation(agent_shader, "turn_angle"), turn_angle);
+    glUniform1ui(glGetUniformLocation(agent_shader, "deposit_amount"), deposit_amount);
 
     glDrawArrays( GL_POINTS, 0, NUM_AGENTS/2 );
 
@@ -364,7 +384,7 @@ void physarum::draw_everything()
 
 	// do my own window
 	ImGui::SetNextWindowPos(ImVec2(10,10));
-	ImGui::SetNextWindowSize(ImVec2(256,315));
+	ImGui::SetNextWindowSize(ImVec2(256,385));
 	ImGui::Begin("Controls", NULL, 0);
 
 	
@@ -374,49 +394,67 @@ void physarum::draw_everything()
 	ImGui::Text("Sensor Angle:                ");
     ImGui::SameLine();
     HelpMarker("The angle between the sensors.");
+    ImGui::SliderFloat("radians", &sense_angle, 0.0f, 3.14f, "%.4f");
 	
     ImGui::Separator();
 
 	ImGui::Text("Sensor Distance:             ");
     ImGui::SameLine();
     HelpMarker("The distance from the agent position to the sensors.");
+    ImGui::SliderFloat("        ", &sense_distance, 0.0f, 0.005f, "%.4f");
 
     ImGui::Separator();
 
 	ImGui::Text("Turn Angle:                  ");
     ImGui::SameLine();
     HelpMarker("Amount that each simulation agent can turn in the movement shader.");
+    ImGui::SliderFloat("radians ", &turn_angle, 0.0f, 3.14f, "%.4f");
 
     ImGui::Separator();
 
 	ImGui::Text("Step Size:                   ");
     ImGui::SameLine();
     HelpMarker("Distance that each sim agent will go in their current direction each step.");
+    ImGui::SliderFloat("    ", &step_size, 0.0f, 0.005f, "%.4f");
 
     ImGui::Separator();
 
 	ImGui::Text("Deposit Amount:              ");
     ImGui::SameLine();
     HelpMarker("Amout of pheremone that is deposited by each simulation agent.");
+    ImGui::DragScalar("  ", ImGuiDataType_U32, &deposit_amt, 50, NULL, NULL, "%u units");
+
+    //update the deposit amount
+    deposit_amount = static_cast<GLuint>(deposit_amt); 
+
 
     ImGui::Separator();
 
 	ImGui::Text("Decay Factor:                ");
     ImGui::SameLine();
     HelpMarker("Scale factor applied when storing the result of the gaussian blur.");
+    ImGui::SliderFloat("              ", &decay_factor, 0.75f, 1.0f, "%.4f");
 
     ImGui::Separator();
     ImGui::Separator();
+
 
 	ImGui::Text("Agent Pointsize:             ");
     ImGui::SameLine();
     HelpMarker("Size of the points used to render the simulation agents.");
+    ImGui::SliderFloat(" ", &agent_pointsize, 0.75f, 10.0f, "%.3f");
 
-    static bool show_trails = false;
-    static bool show_agents = false;
 
     ImGui::Checkbox("Show Trails", &show_trails);
     ImGui::Checkbox("Show Agents", &show_agents);
+
+
+
+
+
+
+
+
 
 	ImGui::End();
 	ImGui::Render();
@@ -431,16 +469,16 @@ void physarum::draw_everything()
 	while (SDL_PollEvent(&event))
 	{
 		ImGui_ImplSDL2_ProcessEvent(&event);
+
 		if (event.type == SDL_QUIT)
 			pquit = true;
+
 		if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
 			pquit = true;
 
 		if ((event.type == SDL_KEYUP  && event.key.keysym.sym == SDLK_ESCAPE) || (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_X1)) //x1 is browser back on the mouse
 			pquit = true;
-		
 	}
-	
 }
 
 

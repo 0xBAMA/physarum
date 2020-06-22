@@ -1,6 +1,5 @@
 #version 430 core
 
-// uniform layout( r16ui ) uimage2D previous;
 layout( binding = 1, r32ui ) uniform uimage2D current;
 
 layout( binding = 0, std430 ) buffer agent_data
@@ -8,8 +7,20 @@ layout( binding = 0, std430 ) buffer agent_data
 	vec2 data[];	// [position0, direction0], [position1, direction1], ...
 };
 
-float amt = 0.001;
+
+
+
+
+uniform float step_size;
+uniform float sense_angle;
+uniform float sense_distance;
+uniform float turn_angle;
+uniform uint deposit_amount;
+
 out vec2 v_pos;
+
+
+
 
 //takes argument in radians
 vec2 rotate(vec2 v, float a) 
@@ -19,6 +30,8 @@ vec2 rotate(vec2 v, float a)
 	mat2 m = mat2(c, -s, s, c);
 	return m * v;
 }
+
+
 
 void main()
 {
@@ -30,9 +43,21 @@ void main()
 	// do the simulation logic to update the value of position
 	
 		// take your samples
+	ivec2 right_sample_loc;
+	ivec2 middle_sample_loc;
+	ivec2 left_sample_loc;
+		
+	uint right_sample = imageLoad().r;
+	uint middle_sample = imageLoad().r;
+	uint left_sample = imageLoad().r;
+	
 		// make a decision on whether to turn left, right, go straight, or a random direction
 	
-	vec2 new_position = (position + amt * direction);
+	
+	
+	
+	
+	vec2 new_position = (position + step_size * direction);
 	
 	// wrap logic
 	if(new_position.x > 1.0)
@@ -50,7 +75,7 @@ void main()
 	data[index] = new_position;
 	
 	
-	imageAtomicAdd(current, ivec2(imageSize(current)*(0.5*(new_position+vec2(1)))), 2000);
+	imageAtomicAdd(current, ivec2(imageSize(current)*(0.5*(new_position+vec2(1)))), deposit_amount);
 	v_pos = new_position;
 	
 	gl_Position = vec4(new_position.x, new_position.y, 0, 1);
