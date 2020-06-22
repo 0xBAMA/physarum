@@ -68,7 +68,7 @@ using std::endl;
 #include "diamond_square.h"
 
 
-#define NUM_AGENTS 2000000
+#define NUM_AGENTS 10000000
 #define DIM 2048
 
 #endif

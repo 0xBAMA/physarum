@@ -72,7 +72,6 @@ void main()
 	}
 	// else, fall through and retain value of direction
 	
-	
 	vec2 new_position = (position + step_size * direction);
 	
 	// wrap logic

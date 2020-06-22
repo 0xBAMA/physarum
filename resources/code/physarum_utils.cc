@@ -234,9 +234,14 @@ void physarum::gl_setup()
     
     glGenTextures(2, &continuum_textures[0]);
 
+    std::vector<unsigned int> data;
+    for(unsigned int x = 0; x < 2048; x++)
+        for(unsigned int y = 0; y < 2048; y++)
+            data.push_back((x ^ y) << 16);
+
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, continuum_textures[0]); // use the specified ID
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, DIM, DIM, 0,  GL_RED_INTEGER, GL_UNSIGNED_INT, NULL); //pass non-null to initialize with some pheremone pattern
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, DIM, DIM, 0,  GL_RED_INTEGER, GL_UNSIGNED_INT, &data[0]); //pass non-null to initialize with some pheremone pattern
     glBindImageTexture(1, continuum_textures[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
 
     glActiveTexture(GL_TEXTURE2); 
@@ -263,11 +268,16 @@ void physarum::gl_setup()
     {
         glm::vec2 pos, dir;
 
+        if(!true)
+        {
         pos.x = ndistribution(engine);
         pos.y = ndistribution(engine);
-
-        // pos.x = udistribution(engine);
-        // pos.y = udistribution(engine);
+        }
+        else
+        {
+        pos.x = udistribution(engine);
+        pos.y = udistribution(engine);
+        }
         
         dir.x = udistribution(engine);
         dir.y = udistribution(engine);
@@ -286,11 +296,11 @@ void physarum::gl_setup()
     glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(GLfloat)*2*NUM_AGENTS, (GLvoid*)&agent_data[0],  GL_DYNAMIC_COPY);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, agent_ssbo); 
 
-	sense_angle = 0.168f;
-	sense_distance = 0.002f;
-	turn_angle = 0.168f;
-	step_size = 0.001f;
-	deposit_amount = 3000;
+	sense_angle = 2.4376f;
+	sense_distance = 0.0015f;
+	turn_angle = 1.632f;
+	step_size = 0.0005f;
+	deposit_amount = 12;
 	decay_factor = 0.99f;
 }
 
@@ -335,7 +345,7 @@ void physarum::draw_everything()
     static float agent_pointsize = 3.0f;
     static bool show_trails = true;
     static bool show_agents = false;
-    static ImU32 deposit_amt = 3000;
+    static ImU32 deposit_amt = deposit_amount;
 
 
 
