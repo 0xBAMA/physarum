@@ -29,13 +29,13 @@ void physarum::create_window()
 	// the window, in a way that's flexible on different resolution screens
 	int total_screen_width = dm.w;
 	int total_screen_height = dm.h;
-	
+
 	cout << "creating window...";
 
 	// window = SDL_CreateWindow( "OpenGL Window", 0, 0, total_screen_width, total_screen_height, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | SDL_WINDOW_BORDERLESS );
 	window = SDL_CreateWindow( "OpenGL Window", 0, 0, total_screen_width, total_screen_height, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE );
   	SDL_ShowWindow(window);
-	
+
 	cout << "done." << endl;
 
 
@@ -73,7 +73,7 @@ void physarum::create_window()
     glPointSize(3.0);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	
+
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -91,11 +91,11 @@ void physarum::create_window()
 	glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 	glClear( GL_COLOR_BUFFER_BIT );
 	SDL_GL_SwapWindow( window );
-	
+
 	cout << "done." << endl;
-	
+
 	ImVec4* colors = ImGui::GetStyle().Colors;
-	
+
 	colors[ImGuiCol_Text]                   = ImVec4(0.64f, 0.37f, 0.37f, 1.00f);
 	colors[ImGuiCol_TextDisabled]           = ImVec4(0.49f, 0.26f, 0.26f, 1.00f);
 	colors[ImGuiCol_WindowBg]               = ImVec4(0.17f, 0.00f, 0.00f, 0.94f);
@@ -153,13 +153,13 @@ void physarum::gl_setup()
 	const GLubyte *version = glGetString( GL_VERSION );		// version as a string
 	printf( "Renderer: %s\n", renderer );
 	printf( "OpenGL version supported %s\n\n\n", version );
-	
-	
-	
+
+
+
 	// create the shader for the points to draw the physarum agents, which also does the movement logic
     agent_shader = Shader("resources/code/shaders/agent.vs.glsl", "resources/code/shaders/agent.fs.glsl").Program;
 
-    	
+
 
 
 
@@ -181,7 +181,7 @@ void physarum::gl_setup()
     //  C is -1,-1
     //  D is  1,-1
     std::vector<glm::vec3> points;
-    
+
     points.clear();
     points.push_back(glm::vec3(-1, 1, 0.5));  //A
     points.push_back(glm::vec3(-1,-1, 0.5));  //C
@@ -211,7 +211,7 @@ void physarum::gl_setup()
     GLuint points_attrib = glGetAttribLocation(continuum_shader, "vPosition");
     glEnableVertexAttribArray(points_attrib);
     glVertexAttribPointer(points_attrib, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*) (static_cast<const char*>(0) + (0)));
-    cout << "done." << endl; 
+    cout << "done." << endl;
 
 
 
@@ -220,34 +220,44 @@ void physarum::gl_setup()
 
 	// create the compute shader for the diffusion and decay of the pheremone field
     diffuse_and_decay_shader = CShader("resources/code/shaders/diffuse_and_decay.cs.glsl").Program;
-	
 
 
 
 
 
-	
-	
+
+
+
 	// create the image2d object for the pheremone field
-        // 16-bit, one channel image texture with GL_R16UI or maybe 32 bit with GL_R32UI 
+        // 16-bit, one channel image texture with GL_R16UI or maybe 32 bit with GL_R32UI
 	    // seed with all zero values or some data generated with std::random
-    
+
     glGenTextures(2, &continuum_textures[0]);
 
     std::vector<unsigned int> data;
+
+    //for(unsigned int x = 0; x < 2048; x++)
+    //    for(unsigned int y = 0; y < 2048; y++)
+    //        data.push_back((x ^ y) << 16);
+
+    PerlinNoise p;
+
     for(unsigned int x = 0; x < 2048; x++)
         for(unsigned int y = 0; y < 2048; y++)
-            data.push_back((x ^ y) << 16);
+            data.push_back((1<<18)*p.noise(0.01*x,0.01*y, 0.3));
+
+
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, continuum_textures[0]); // use the specified ID
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, DIM, DIM, 0,  GL_RED_INTEGER, GL_UNSIGNED_INT, &data[0]); //pass non-null to initialize with some pheremone pattern
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, DIM, DIM, 0,  GL_RED_INTEGER, GL_UNSIGNED_INT, NULL); //pass non-null to initialize with some pheremone pattern
     glBindImageTexture(1, continuum_textures[0], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
 
-    glActiveTexture(GL_TEXTURE2); 
+    glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, continuum_textures[1]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, DIM, DIM, 0,  GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
-    glBindImageTexture(2, continuum_textures[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI); 	
+    glBindImageTexture(2, continuum_textures[1], 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
 
 
 
@@ -259,8 +269,8 @@ void physarum::gl_setup()
 
     std::default_random_engine engine{seed};
     std::uniform_real_distribution<GLfloat> udistribution{-1, 1};
-    std::normal_distribution<GLfloat> ndistribution(0.0,0.3); 
-    
+    std::normal_distribution<GLfloat> ndistribution(0.0,0.3);
+
     udistribution.reset();
     ndistribution.reset();
 
@@ -278,7 +288,7 @@ void physarum::gl_setup()
         pos.x = udistribution(engine);
         pos.y = udistribution(engine);
         }
-        
+
         dir.x = udistribution(engine);
         dir.y = udistribution(engine);
 
@@ -292,16 +302,16 @@ void physarum::gl_setup()
     }
 
     glGenBuffers(1, &agent_ssbo);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, agent_ssbo);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(GLfloat)*2*NUM_AGENTS, (GLvoid*)&agent_data[0],  GL_DYNAMIC_COPY);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, agent_ssbo); 
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, agent_ssbo);	// v I had left out a factor of two here, I had never solved this bug but it's super simple
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(GLfloat)*2*2*NUM_AGENTS, (GLvoid*)&agent_data[0],  GL_DYNAMIC_COPY);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, agent_ssbo);
 
-	sense_angle = 2.4376f;
-	sense_distance = 0.0015f;
-	turn_angle = 1.632f;
-	step_size = 0.0005f;
-	deposit_amount = 12;
-	decay_factor = 0.99f;
+	sense_angle = 2.4540f;
+	sense_distance = 0.0013f;
+	turn_angle = 1.250f;
+	step_size = 0.0006f;
+	deposit_amount = 1250;
+	decay_factor = 0.9875f;
 }
 
 
@@ -367,7 +377,7 @@ void physarum::draw_everything()
     glUseProgram(agent_shader);
     glPointSize(agent_pointsize);
 
-    
+
     // generation of the random values to be used in the shader
     std::vector<glm::vec2> random_directions;
     long unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -380,7 +390,7 @@ void physarum::draw_everything()
 
     glUniform2fv(glGetUniformLocation(agent_shader, "random_values"), 8, glm::value_ptr(random_directions[0]));
 
-    
+
 
 
     // the rest of the simulation parameters
@@ -414,7 +424,7 @@ void physarum::draw_everything()
 	ImGui::SetNextWindowSize(ImVec2(256,385));
 	ImGui::Begin("Controls", NULL, 0);
 
-	
+
 
 
     // widgets
@@ -422,7 +432,7 @@ void physarum::draw_everything()
     ImGui::SameLine();
     HelpMarker("The angle between the sensors.");
     ImGui::SliderFloat("radians", &sense_angle, 0.0f, 3.14f, "%.4f");
-	
+
     ImGui::Separator();
 
 	ImGui::Text("Sensor Distance:             ");
@@ -452,7 +462,7 @@ void physarum::draw_everything()
     ImGui::DragScalar("  ", ImGuiDataType_U32, &deposit_amt, 50, NULL, NULL, "%u units");
 
     //update the deposit amount
-    deposit_amount = static_cast<GLuint>(deposit_amt); 
+    deposit_amount = static_cast<GLuint>(deposit_amt);
 
 
     ImGui::Separator();
@@ -487,11 +497,11 @@ void physarum::draw_everything()
 	ImGui::Render();
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());   // put imgui data into the framebuffer
-	
-	SDL_GL_SwapWindow(window);			// swap the double buffers 
-	
+
+	SDL_GL_SwapWindow(window);			// swap the double buffers
+
 	// handle events
-	
+
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
@@ -520,6 +530,6 @@ void physarum::quit()
   SDL_GL_DeleteContext(GLcontext);
   SDL_DestroyWindow(window);
   SDL_Quit();
-  
+
   cout << "goodbye." << endl;
 }
