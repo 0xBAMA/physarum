@@ -421,10 +421,28 @@ void physarum::draw_everything()
 
 	// do my own window
 	ImGui::SetNextWindowPos(ImVec2(10,10));
-	ImGui::SetNextWindowSize(ImVec2(256,385));
+	ImGui::SetNextWindowSize(ImVec2(256,410));
 	ImGui::Begin("Controls", NULL, 0);
 
 
+	if( ImGui::SmallButton( "Randomize Parameters" ) ) {
+		long unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
+		std::default_random_engine engine{seed};
+		std::uniform_real_distribution<GLfloat> senseAngleDistribution( 0.0f, float(pi) );
+		std::uniform_real_distribution<GLfloat> senseDistanceDistribution( 0.0f, 0.005f );
+		std::uniform_real_distribution<GLfloat> turnAngleDistribution( 0.0f, float(pi) );
+		std::uniform_real_distribution<GLfloat> stepSizeDistribution( 0.0f, 0.005f );
+		std::uniform_int_distribution<int> depositAmountDistribution( 4000, 75000 );
+		std::uniform_real_distribution<GLfloat> decayFactorDistribution( 0.75f, 1.0f );
+
+		// generate new values based on above distributions
+		sense_angle = senseAngleDistribution( engine );
+		sense_distance = senseDistanceDistribution( engine );
+		turn_angle = turnAngleDistribution( engine );
+		step_size = stepSizeDistribution( engine );
+		deposit_amount = depositAmountDistribution( engine );
+		decay_factor = decayFactorDistribution( engine );
+	}
 
 
     // widgets
@@ -457,12 +475,14 @@ void physarum::draw_everything()
     ImGui::Separator();
 
 	ImGui::Text("Deposit Amount:              ");
+		deposit_amt = deposit_amount;
     ImGui::SameLine();
     HelpMarker("Amout of pheremone that is deposited by each simulation agent.");
     ImGui::DragScalar("  ", ImGuiDataType_U32, &deposit_amt, 50, NULL, NULL, "%u units");
 
     //update the deposit amount
-    deposit_amount = static_cast<GLuint>(deposit_amt);
+    if( deposit_amt != deposit_amount )
+			deposit_amount = static_cast<GLuint>(deposit_amt);
 
 
     ImGui::Separator();

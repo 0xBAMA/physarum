@@ -28,6 +28,9 @@ using std::cerr;
 using std::flush;
 using std::endl;
 
+// pi definition - definitely sufficient precision
+constexpr double pi = 3.14159265358979323846;
+
 //vector math library GLM
 #define GLM_FORCE_SWIZZLE
 #define GLM_SWIZZLE_XYZW
@@ -68,7 +71,7 @@ using std::endl;
 #include "diamond_square.h"
 
 
-#define NUM_AGENTS 100000
+#define NUM_AGENTS 1000000
 #define DIM 2048
 
 #endif
