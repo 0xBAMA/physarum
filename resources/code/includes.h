@@ -70,8 +70,7 @@ constexpr double pi = 3.14159265358979323846;
 //diamond square heightmap generation
 #include "diamond_square.h"
 
-
 #define NUM_AGENTS 1000000
-#define DIM 2048
+#define DIM 1024
 
 #endif
